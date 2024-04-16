@@ -16,7 +16,27 @@ import torchvision.transforms as transforms
 import torchvision.datasets as datasets
 from PIL import Image, ImageOps, ImageFilter
 
-# frozen
+class GaussianBlur(object):
+    def __init__(self, p):
+        self.p = p
+
+    def __call__(self, img):
+        if random.random() < self.p:
+            sigma = random.random() * 1.9 + 0.1
+            return img.filter(ImageFilter.GaussianBlur(sigma))
+        return img
+
+
+class Solarization(object):
+    def __init__(self, p):
+        self.p = p
+
+    def __call__(self, img):
+        if random.random() < self.p:
+            return ImageOps.solarize(img)
+        return img
+
+
 class MyDataset(torch.utils.data.Dataset):
     """ to create my dataset """
     def __init__(self, input=None, output=None, transform=None):
@@ -53,14 +73,59 @@ class MyDataset(torch.utils.data.Dataset):
         return input, output
 
 
-class MyTransforms:
-    def __init__(self) -> None:
-        pass
+class SSLTransform:
+    def __init__(self, transform=None, transform_prime=None) -> None:
+        """
+        transform for self-supervised learning
 
-    def __call__(self, x: np.float32) -> torch.Tensor:
-        x = torch.from_numpy(x.astype(np.float32))  # example
-        return x
-# ToDo: defaultのtransformを設定する
+        Parameters
+        ----------
+        transform: torchvision.transforms
+            transform for the original image
+
+        transform_prime: torchvision.transforms
+            transform to be applied to the second
+        
+        """
+        if transform is None:
+            self.transform = transforms.Compose([
+                transforms.RandomResizedCrop(32, interpolation=Image.BICUBIC),
+                transforms.RandomHorizontalFlip(p=0.5),
+                transforms.RandomApply(
+                    [transforms.ColorJitter(brightness=0.4, contrast=0.4, saturation=0.4, hue=0.1)],
+                    p=0.8
+                    ),
+                transforms.RandomGrayscale(p=0.2),
+                GaussianBlur(p=0.5),
+                Solarization(p=0.2),
+                transforms.ToTensor(),
+                transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))
+            ])
+        else:
+            self.transform = transform
+        if transform_prime is None:
+            self.transform_prime = transforms.Compose([
+                transforms.RandomResizedCrop(32, interpolation=Image.BICUBIC),
+                transforms.RandomHorizontalFlip(p=0.5),
+                transforms.RandomApply(
+                    [transforms.ColorJitter(brightness=0.4, contrast=0.4, saturation=0.4, hue=0.1)],
+                    p=0.8
+                    ),
+                transforms.RandomGrayscale(p=0.2),
+                GaussianBlur(p=0.5),
+                Solarization(p=0.2),
+                transforms.ToTensor(),
+                transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))
+            ])
+        else:
+            self.transform_prime = transform_prime
+        
+
+    def __call__(self, x):
+        y1 = self.transform(x)
+        y2 = self.transform_prime(x)
+        return y1, y2
+
 
 def prep_dataset(image_path:str, transform=None) -> torch.utils.data.Dataset:
     """
