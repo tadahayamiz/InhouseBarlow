@@ -25,7 +25,7 @@ Please contact tadahaya[at]gmail.com before publishing your paper using the cont
         │
         ├── ihbt.py         <- a Python module
         │
-        ├── config.yaml     <- a default config file
+        ├── config.yaml     <- the default config file
         │
         └── src             <- src for this module
 
