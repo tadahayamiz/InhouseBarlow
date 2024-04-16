@@ -6,17 +6,17 @@ with open('requirements.txt') as requirements_file:
 # modify entry_points to use command line 
 # {COMMAND NAME}={module path}:{function in the module}
 setup(
-    name="ihvit",
+    name="ihbt",
     version="0.0.1",
-    description="inhouse ViT",
+    description="inhouse BarlowTwins",
     author="tadahaya",
     packages=find_packages(),
     install_requires=install_requirements,
     include_package_data=True, # necessary for including data indicated in MANIFEST.in
     entry_points={
         "console_scripts": [
-            "ihvit=ihvit.main:main",
-            "ihvit.test=ihvit.main:test",
+            "ihbt=ihbt.main:main",
+            "ihbt.test=ihbt.main:test",
         ]
     },
     classifiers=[

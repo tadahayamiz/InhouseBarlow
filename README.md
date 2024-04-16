@@ -1,7 +1,7 @@
-# ihvit
-a repository for in-house ViT implementation based on the followings:  
-- [origin](https://github.com/google-research/vision_transformer)  
-- [scratch](https://github.com/tintn/vision-transformer-from-scratch/tree/main)  
+# ihbt
+a repository for in-house BarlowTwins implementation based on the followings:  
+- [origin](https://github.com/facebookresearch/barlowtwins)  
+- [simple version](https://github.com/MaxLikesMath/Barlow-Twins-Pytorch/tree/main)  
 
 # Note
 This repository is under construction and will be officially released by [Mizuno group](https://github.com/mizuno-group).  
@@ -18,10 +18,16 @@ Please contact tadahaya[at]gmail.com before publishing your paper using the cont
     │
     ├── setup.py            <- makes project pip installable (pip install -e .) so src can be imported
     │
-    └── module              <- Source code for use in this project.
+    └── ihbt                <- Source code for use in this project.
         ├── __init__.py     <- Makes src a Python module
         │
-        └── core.py         <- main src for this module
+        ├── main.py         <- main CLI for this module
+        │
+        ├── ihbt.py         <- a Python module
+        │
+        ├── config.yaml     <- a default config file
+        │
+        └── src             <- src for this module
 
 ------------
 
