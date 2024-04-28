@@ -45,7 +45,7 @@ class IhBT:
                 self.config = yaml.safe_load(f)
             self.config["device"] = "cuda" if torch.cuda.is_available() else "cpu"
             self.config["config_path"] = config_path
-        self.model = VitForClassification(self.config)
+        self.model = vit.VitForClassification(self.config)
         self.model.load_state_dict(torch.load(model_path))
 
 

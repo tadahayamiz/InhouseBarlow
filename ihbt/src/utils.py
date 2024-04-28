@@ -17,12 +17,10 @@ import torchvision.transforms as transforms
 from .models import VitForClassification
 
 def save_experiment(
-        experiment_name, config, model, train_losses, test_losses,
-        accuracies, classes, base_dir=""
+        experiment_name, base_dir, config, model,
+        train_losses, test_losses, accuracies
         ):
     """ save the experiment: config, model, metrics, and progress plot """
-    if len(base_dir) == 0:
-        base_dir = os.path.dirname(config["config_path"])
     outdir = os.path.join(base_dir, experiment_name)
     os.makedirs(outdir, exist_ok=True)
 
@@ -38,7 +36,6 @@ def save_experiment(
             'train_losses': train_losses,
             'test_losses': test_losses,
             'accuracies': accuracies,
-            'classes': classes,
         }
         json.dump(data, f, sort_keys=True, indent=4)
 
@@ -51,7 +48,13 @@ def save_experiment(
     save_checkpoint(experiment_name, model, "final", base_dir=base_dir)
 
 
-def save_checkpoint(experiment_name, model, epoch, base_dir="experiments"):
+def save_checkpoint(experiment_name, model, epoch, base_dir):
+    """
+    save the model
+    
+    # Trainerの中で走る
+    
+    """
     outdir = os.path.join(base_dir, experiment_name)
     os.makedirs(outdir, exist_ok=True)
     cpfile = os.path.join(outdir, f"model_{epoch}.pt")

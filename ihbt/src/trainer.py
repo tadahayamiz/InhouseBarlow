@@ -20,7 +20,7 @@ class Trainer:
         self.device = device
 
 
-    def train(self, trainloader, testloader, classes:dict=None, save_model_evry_n_epochs=0):
+    def train(self, trainloader, testloader, save_model_evry_n_epochs=0):
         """
         train the model for the specified number of epochs.
         
@@ -38,7 +38,6 @@ class Trainer:
             accuracy, test_loss = self.evaluate(testloader)
             train_losses.append(train_loss)
             test_losses.append(test_loss)
-            accuracies.append(accuracy)
             print(
                 f"Epoch: {i + 1}, Train_loss: {train_loss:.4f}, Test loss: {test_loss:.4f}, Accuracy: {accuracy:.4f}"
                 )
@@ -47,28 +46,27 @@ class Trainer:
                 save_checkpoint(self.exp_name, self.model, i + 1)
         # save the experiment
         save_experiment(
-            self.exp_name, config, self.model, train_losses, test_losses, accuracies, classes
+            self.exp_name, config, self.model, train_losses, test_losses, accuracies
             )
+        # ToDo base_dirを追加
 
 
     def train_epoch(self, trainloader):
         """ train the model for one epoch """
         self.model.train()
         total_loss = 0
-        for data, label in trainloader:
+        for y1, y2 in trainloader:
             # batchをdeviceへ
-            data, label = data.to(self.device), label.to(self.device)
+            y1, y2 = y1.to(self.device), y2.to(self.device)
             # 勾配を初期化
             self.optimizer.zero_grad()
-            # forward
-            output = self.model(data)[0] # attentionもNoneで返るので
-            # loss計算
-            loss = self.loss_fn(output, label)
+            # forward / loss
+            loss = self.model(y1, y2)[0] # attentionもNoneで返るので
             # backpropagation
             loss.backward()
             # パラメータ更新
             self.optimizer.step()
-            total_loss += loss.item() * len(data) # loss_fnがbatch内での平均の値になっている模様
+            total_loss += loss.item()
         return total_loss / len(trainloader.dataset) # 全データセットのうちのいくらかという比率になっている
     
 
@@ -78,17 +76,12 @@ class Trainer:
         total_loss = 0
         correct = 0
         with torch.no_grad():
-            for data, label in testloader:
+            for y1, y2 in testloader:
                 # batchをdeviceへ
-                data, label = data.to(self.device), label.to(self.device)
-                # 予測
-                output, _ = self.model(data)
-                # lossの計算
-                loss = self.loss_fn(output, label)
-                total_loss += loss.item() * len(data)
-                # accuracyの計算
-                predictions = torch.argmax(output, dim=1)
-                correct += torch.sum(predictions == label).item()
+                y1, y2 = y1.to(self.device), y2.to(self.device)
+                # loss
+                loss, _ = self.model(y1, y2)
+                total_loss += loss.item()
         accuracy = correct / len(testloader.dataset)
         avg_loss = total_loss / len(testloader.dataset)
         return accuracy, avg_loss
